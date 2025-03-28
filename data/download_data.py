@@ -1,10 +1,7 @@
 from datasets import load_dataset
-import sys
 """
-run: python3 download_data.py tdavidson/hate_speech_offensive
-make sure the file downloads only in parquet form
-fix all issues
+run:  python3 download_data.py
 """
 
-data = load_dataset(sys.argv[0])
-data.to_parquet("data.parquet")
+data = load_dataset("tdavidson/hate_speech_offensive") # change the name to path of dataset from huggingface
+data.save_to_disk("tdavidson/hate_speech_offensive")
