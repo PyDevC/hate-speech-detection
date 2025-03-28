@@ -1,5 +1,3 @@
-# DATASET
+# citations
 
-The dataset need to be preprocessed.
-before doing EDA I recommend to first preprocess it according the websites from where the data is collected
-Then convert the format to parquet
+cite all datasets properly
