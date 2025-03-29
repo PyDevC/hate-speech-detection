@@ -1,18 +1,36 @@
-import pandas as pd
-import numpy as np
-import pyarrow
+import torch
+from torch.utils.data import Dataset
 
 
-class Dataset:
-    """Base class of every dataset
-    """
-    def __init__(self, Key):
-        self.data = self.load_data(Key)
-        self.shape = self.data.shape
-        self.columns = self.data.columns
+class baseDataset(Dataset):
+    def __init__(self, data, tokenizer):
+        self.text, self.labels = self.load_data(data)
+        self.tokenizer = tokenizer
 
-    def load_data(self, Key)->pd.DataFrame:
-        """Read parquet file from a path Key
-        Return: DataFrame from parquet file
-        """
-        return pd.read_parquet(Key)
+    def __len__(self):
+        return len(self.text)
+
+    def __getitem__(self, idx):
+        if isinstance(idx, (list, tuple)):
+            text = [self.text[i] for i in idx]
+            labels = [self.labels[i] for i in idx]
+        else:
+            text = [self.text[idx]]
+            labels = [self.labels[idx]]
+
+        encodings = self.tokenizer(
+            text,
+            truncation=True,
+            padding="max_length",
+            return_tensors="pt",
+        )
+        return {
+            "input": encodings["input_ids"].squeeze(0),
+            "attention_mask": encodings["attention_mask"].squeeze(0),
+            "labels": torch.tensor(labels, dtype=torch.long)
+        }
+
+    def load_data(self, data):
+        texts = list[data["tweets"]]
+        labels = list[data["class"]]
+        return texts, labels
