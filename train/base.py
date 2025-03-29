@@ -45,14 +45,15 @@ def train_model(model, train_dataset, val_dataset, optimizer, criterion):
 
             if total > 0: 
                 loop.set_postfix(loss=total_loss / total, acc=correct / total)
+        print(f"epoch[{epoch}]/[{epochs}] completed")
 
-        evaluate_model(model, val_loader, criterion)
+        evaluate_model(model, val_loader, criterion,device)
 
 def evaluate_model(model, val_loader, criterion, device):
     model.eval()
     preds, true_labels = [], []
     total_loss = 0
-
+    print("evaluation")
     with torch.no_grad():
         for batch in val_loader:
             input_ids, attention_mask, labels = batch["input_ids"].to(device), batch["attention_mask"].to(device), batch["labels"].to(device)
@@ -66,4 +67,4 @@ def evaluate_model(model, val_loader, criterion, device):
     acc = accuracy_score(true_labels, preds)
     f1 = f1_score(true_labels, preds, average="weighted")
     r2 = r2_score(true_labels, preds)
-    print(f"Validation Loss: {total_loss / len(val_loader):.4f}, Accuracy: {acc:.4f}, F1-score: {f1:.4f}, r2_score: {r2}")
+    print(f"Validation Loss: {total_loss / len(val_loader):.4f}, Accuracy: {acc:.4f}, F1-score: {f1:.4f}, r2_score: {r2:.4f}")

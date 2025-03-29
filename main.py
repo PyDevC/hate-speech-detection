@@ -1,4 +1,5 @@
-from dataset.tdavidson import tdavidson_hate_offensive
+from dataset import tdavidson, hatexplain 
+import torch
 from datasets import load_dataset, Dataset
 from train.base import train_model
 from sklearn.metrics import accuracy_score, r2_score, precision_score
@@ -9,7 +10,7 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer, get_
 
 def train(huggingface:str, stratify_column, model_name, device):
     data = load_dataset(huggingface)
-    df = data["train"].to_pandas()
+    df = data["test"].to_pandas()
 
     train_df, val_df = train_test_split(df, 
                                         test_size=0.25, 
@@ -22,8 +23,8 @@ def train(huggingface:str, stratify_column, model_name, device):
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-    train_dataset = tdavidson_hate_offensive(train_dataset, tokenizer)
-    val_dataset = tdavidson_hate_offensive(val_dataset, tokenizer)
+    train_dataset = tdavidson.tdavidson_hate_offensive(train_dataset, tokenizer)
+    val_dataset = tdavidson.tdavidson_hate_offensive(val_dataset, tokenizer)
 
 
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=3)
@@ -36,4 +37,10 @@ def train(huggingface:str, stratify_column, model_name, device):
     model.save_pretrained("models/bert_tdavidson")
 
 if __name__ == "__main__":
-    train("tdavidson/hate_speech_offensive", "class", "google-bert/bert-base-chinese", "cuda")
+
+    huggingface = "tweets-hate-speech-detection/tweets_hate_speech_detection"
+    stratify_column = "label"
+    model_name = "FacebookAI/roberta-base"
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+    train(huggingface, stratify_column, model_name, device)

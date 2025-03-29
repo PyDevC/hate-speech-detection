@@ -5,20 +5,20 @@ from datasets import Dataset
 
 class baseDataset(Dataset):
     def __init__(self, data, tokenizer, max_length=128):
-        self.text = list(data["tweet"]) 
+        self.texts = list(data["tweet"]) 
         self.labels = list(data["class"])  
         self.tokenizer = tokenizer
         self.max_length = max_length
 
     def __len__(self):
-        return len(self.text)
+        return len(self.texts)
 
     def __getitem__(self, idx):
         if isinstance(idx, (list, tuple)):  
-            texts = [self.text[i] for i in idx]
+            texts = [self.texts[i] for i in idx]
             labels = [self.labels[i] for i in idx]
         else:
-            texts = [self.text[idx]]
+            texts = [self.texts[idx]]
             labels = [self.labels[idx]]
 
         encodings = self.tokenizer(
