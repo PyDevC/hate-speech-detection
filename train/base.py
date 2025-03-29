@@ -1,9 +1,11 @@
 import torch
 from sklearn.metrics import accuracy_score, r2_score, precision_score, f1_score
+from transformers import get_scheduler
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 
-def train_model(model, train_dataset, val_dataset, optimzer, lr_scheduler, criterion):
+def train_model(model, train_dataset, val_dataset, optimizer, criterion):
     """trains model over several num_epoch
     parameters:
         model: base model or algorithm
@@ -15,26 +17,25 @@ def train_model(model, train_dataset, val_dataset, optimzer, lr_scheduler, crite
     """
     train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=16, shuffle=False)
-
+    num_training_steps = len(train_dataloader) 
+    lr_scheduler = get_scheduler("linear", optimizer=optimizer, num_warmup_steps=0, num_training_steps=num_training_steps)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model = model.to(device)
 
-    num_epoch = 3
-    for epoch in range(num_epoch):
-        model.train()
-        for batch in train_dataloader:
-            optimzer.zero_grad()
+    epochs = 3
+    model.train()
+    for epoch in range(epochs):
+        total_loss, correct, total = 0, 0, 0
+        loop = tqdm(train_dataloader, leave=True)
 
-            input = batch['input_ids'].to(model.device)
-            attention_mask = batch['attention_mask'].to(model.device)
-            labels = batch['labels'].to(model.device)
+        for batch in loop:
+            optimizer.zero_grad()
+            input_ids, attention_mask, labels = batch["input_ids"].to(device), batch["attention_mask"].to(device), batch["labels"].to(device)
 
-            outputs = model(input_ids=input, attention_mask=attention_mask, labels=labels)
-
-            loss = outputs.logits
+            outputs = model(input_ids, attention_mask=attention_mask)
+            loss = criterion(outputs.logits, labels)
             loss.backward()
-            optimzer.step()
-        
+            optimizer.step()
             lr_scheduler.step()
 
             total_loss += loss.item()
@@ -42,10 +43,10 @@ def train_model(model, train_dataset, val_dataset, optimzer, lr_scheduler, crite
             correct += (preds == labels).sum().item()
             total += labels.size(0)
 
-        print(f"Epoch {epoch+1}/{num_epoch} completed!")
+            if total > 0: 
+                loop.set_postfix(loss=total_loss / total, acc=correct / total)
 
-    evaluate_model(model, val_loader, criterion, device)
-    return model
+        evaluate_model(model, val_loader, criterion)
 
 def evaluate_model(model, val_loader, criterion, device):
     model.eval()
