@@ -1,4 +1,5 @@
 import torch
+import random
 import pandas as pd
 import torch.nn as nn
 import torch.optim as optim
@@ -131,21 +132,27 @@ def run():
             "f1 score": [], 
             "r2_score": []
     }
-    datasets = {
-            "tdavidson/hate_speech_offensive": ["tweet", "class"],
-            "limjiayi/hateful_memes_expanded": ["text", "label"],
-        "community-datasets/roman_urdu_hate_speech": ["tweet", "label"]
-    }
+    datasets = [
+            "tdavidson/hate_speech_offensive",
+            "limjiayi/hateful_memes_expanded",
+        "community-datasets/roman_urdu_hate_speech"
+    ]
+
     models = ["GroNLP/hateBERT", "unitary/toxic-bert", "google-bert/bert-base-uncased", "FacebookAI/roberta-large"]
+
+    random.shuffle(models)
+    random.shuffle(datasets)
     for i in datasets:
         for j in models:
             print(i, j)
+            text, label = input().split()
             data["model"].append(j)
             data["dataset"].append(i)
-            acc, f1, r2 = train(i, datasets[i][0], datasets[i][1], j)
+            acc, f1, r2 = train(i, text, label ,j)
             data["accuracy"].append(acc)
             data["f1 score"].append(f1)
             data["r2_score"].append(r2)
+            print(data)
     df = pd.DataFrame(data)
     df.to_csv("results.csv")
 run()
