@@ -37,7 +37,6 @@ def train(huggingface:str, stratify_column, model_name, device):
     model.save_pretrained("models/bert_tdavidson")
 
 if __name__ == "__main__":
-
     huggingface = "tweets-hate-speech-detection/tweets_hate_speech_detection"
     stratify_column = "label"
     model_name = "FacebookAI/roberta-base"

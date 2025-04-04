@@ -4,9 +4,9 @@ from datasets import Dataset
 
 
 class baseDataset(Dataset):
-    def __init__(self, data, tokenizer, max_length=128):
-        self.texts = list(data["tweet"]) 
-        self.labels = list(data["class"])  
+    def __init__(self, data,text_column, label_column ,tokenizer, max_length=128):
+        self.texts = list(data[text_column]) 
+        self.labels = list(data[label_column])  
         self.tokenizer = tokenizer
         self.max_length = max_length
 
@@ -34,8 +34,3 @@ class baseDataset(Dataset):
             "attention_mask": encodings["attention_mask"].squeeze(0),
             "labels": torch.tensor(labels, dtype=torch.long),
         }
-
-    def load_data(self, data):
-        texts = list[data["tweet"]]
-        labels = list[data["class"]]
-        return texts, labels
