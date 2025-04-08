@@ -126,33 +126,6 @@ def train(dataset_name, text, label, model_name):
     return acc, f1, r2
     
 def run():
-    data = { "model": [],
-            "dataset": [],
-            "accuracy": [],
-            "f1 score": [], 
-            "r2_score": []
-    }
-    datasets = [
-            "tdavidson/hate_speech_offensive",
-            "limjiayi/hateful_memes_expanded",
-        "community-datasets/roman_urdu_hate_speech"
-    ]
-
-    models = ["GroNLP/hateBERT", "unitary/toxic-bert", "google-bert/bert-base-uncased", "FacebookAI/roberta-large"]
-
-    random.shuffle(models)
-    random.shuffle(datasets)
-    for i in datasets:
-        for j in models:
-            print(i, j)
-            text, label = input().split()
-            data["model"].append(j)
-            data["dataset"].append(i)
-            acc, f1, r2 = train(i, text, label ,j)
-            data["accuracy"].append(acc)
-            data["f1 score"].append(f1)
-            data["r2_score"].append(r2)
-            print(data)
-    df = pd.DataFrame(data)
-    df.to_csv("results.csv")
+    acc, f1, r2 = train("tdavidson/hate_speech_offensive", "tweet", "label" ,"FacebookAI/roberta-large")
+    print(acc, f1, r2)
 run()
