@@ -2,3 +2,4 @@ dataset/data*
 models/*
 !models/README
 *__pycache__*/
+*.ipynb*
